@@ -196,7 +196,7 @@ password:
 
         mov rdi, rsp                ; setting rdi to input buffer
         mov rax, 0x2121656e65726573 ; moving Password into buffer
-        scasd                       ; scanning for a match
+        scasq                       ; scanning for a match
         jne password_incorrect           ; if not a match then re-ask for password
 
 ;               PROMPT PASSWORD CORRECT
