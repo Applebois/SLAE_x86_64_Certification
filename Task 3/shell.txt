@@ -1,0 +1,3 @@
+gcc shellcode.c -o shellcode -fno-stack-protector -z execstack -no-pie
+
+shellcode reuse back assignment2
